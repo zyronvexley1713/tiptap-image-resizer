@@ -1725,16 +1725,41 @@ export default function ResizableImageComponent({
       // if (action === 'rotate-ccw')
       //   updateAttributes({ rotate: (n(rotate, 0) + 270) % 360 });
 
+      // if (action === 'rotate-cw') {
+      //   const current = n(rotate, 0);
+      //   const newRotate = (current + 90) % 360;
+      //   commitWithHistory({ rotate: newRotate });
+      // }
+
+      // if (action === 'rotate-ccw') {
+      //   const current = n(rotate, 0);
+      //   const newRotate = (current + 270) % 360; // ya (current - 90 + 360) % 360
+      //   commitWithHistory({ rotate: newRotate });
+      // }
+
       if (action === 'rotate-cw') {
         const current = n(rotate, 0);
         const newRotate = (current + 90) % 360;
-        commitWithHistory({ rotate: newRotate });
+        // ✅ Swap dims on 90/270, restore on 0/180
+        const isOrthogonal = newRotate === 90 || newRotate === 270;
+        const wasOrthogonal = current === 90 || current === 270;
+        const shouldSwap = isOrthogonal !== wasOrthogonal;
+        commitWithHistory({
+          rotate: newRotate,
+          ...(shouldSwap ? { width: curH, height: curW } : {}),
+        });
       }
 
       if (action === 'rotate-ccw') {
         const current = n(rotate, 0);
-        const newRotate = (current + 270) % 360; // ya (current - 90 + 360) % 360
-        commitWithHistory({ rotate: newRotate });
+        const newRotate = (current + 270) % 360;
+        const isOrthogonal = newRotate === 90 || newRotate === 270;
+        const wasOrthogonal = current === 90 || current === 270;
+        const shouldSwap = isOrthogonal !== wasOrthogonal;
+        commitWithHistory({
+          rotate: newRotate,
+          ...(shouldSwap ? { width: curH, height: curW } : {}),
+        });
       }
 
       // Filter preset
@@ -1985,31 +2010,72 @@ export default function ResizableImageComponent({
       .filter(Boolean)
       .join(' ') || undefined;
 
+  const rot = n(rotate, 0);
+  const isOrthogonal = rot === 90 || rot === 270;
+
+
   const imgStyle: React.CSSProperties = hasCrop
     ? {
-        position: 'absolute',
-        width: `${100 / scW}%`,
-        height: `${100 / scH}%`,
-        left: `${(-cl / scW) * 100}%`,
-        top: `${(-ct / scH) * 100}%`,
-        objectFit: 'fill',
-        filter: filterStr,
-        pointerEvents: 'none',
-        userSelect: 'none',
-        transform: flipRotateTransform,
-        transformOrigin: 'center center', // ← add karo
-      }
+      position: 'absolute',
+      width: `${100 / scW}%`,
+      height: `${100 / scH}%`,
+      left: `${(-cl / scW) * 100}%`,
+      top: `${(-ct / scH) * 100}%`,
+      objectFit: 'fill',
+      filter: filterStr,
+      pointerEvents: 'none',
+      userSelect: 'none',
+      // transform: flipRotateTransform,
+      // transformOrigin: 'center center', // ← add karo
+    }
     : {
-        width: '100%',
-        height: '100%',
-        objectFit: 'fill' as const,
-        display: 'block',
-        filter: filterStr,
-        pointerEvents: 'none',
-        userSelect: 'none',
-        transform: flipRotateTransform,
-        transformOrigin: 'center center', // ← add karo
-      };
+      width: '100%',
+      height: '100%',
+      objectFit: 'fill' as const,
+      display: 'block',
+      filter: filterStr,
+      pointerEvents: 'none',
+      userSelect: 'none',
+      // transform: flipRotateTransform,
+      // transformOrigin: 'center center', // ← add karo
+    };
+
+
+
+  // const rotatingWrapperStyle: React.CSSProperties = {
+  //   position: 'absolute',
+  //   width: isOrthogonal ? `${curH}px` : '100%',
+  //   height: isOrthogonal ? `${curW}px` : '100%',
+  //   top: '50%',
+  //   left: '50%',
+  //   transformOrigin: 'center center',
+  //   transform: [
+  //     'translate(-50%, -50%)',
+  //     rot ? `rotate(${rot}deg)` : '',
+  //     flipH ? 'scaleX(-1)' : '',
+  //     flipV ? 'scaleY(-1)' : '',
+  //   ].filter(Boolean).join(' '),
+  // };    
+
+
+
+  const liveW = resizeDims?.w ?? curW;
+  const liveH = resizeDims?.h ?? curH;
+
+  const rotatingWrapperStyle: React.CSSProperties = {
+    position: 'absolute',
+    width: isOrthogonal ? `${liveH}px` : '100%',
+    height: isOrthogonal ? `${liveW}px` : '100%',
+    top: '50%',
+    left: '50%',
+    transformOrigin: 'center center',
+    transform: [
+      'translate(-50%, -50%)',
+      rot ? `rotate(${rot}deg)` : '',
+      flipH ? 'scaleX(-1)' : '',
+      flipV ? 'scaleY(-1)' : '',
+    ].filter(Boolean).join(' '),
+  };
 
   // ── Border style ──────────────────────────────────────────────────────────────
   const bw = n(borderWidth, 0);
@@ -2137,21 +2203,40 @@ export default function ResizableImageComponent({
               </div>
             )}
             {src && (
-              <img
-                src={src}
-                alt={alt || ''}
-                draggable={false}
-                style={{
-                  ...imgStyle,
-                  opacity: imgLoaded ? 1 : 0,
-                  transition: 'opacity 0.2s',
-                }}
-                onLoad={() => setImgLoaded(true)}
-                onError={() => {
-                  setImgError(true);
-                  setImgLoaded(false);
-                }}
-              />
+              // <img
+              //   src={src}
+              //   alt={alt || ''}
+              //   draggable={false}
+              //   style={{
+              //     ...imgStyle,
+              //     opacity: imgLoaded ? 1 : 0,
+              //     transition: 'opacity 0.2s',
+              //   }}
+              //   onLoad={() => setImgLoaded(true)}
+              //   onError={() => {
+              //     setImgError(true);
+              //     setImgLoaded(false);
+              //   }}
+              // />
+
+              <div style={rotatingWrapperStyle}>
+                <img
+                  src={src}
+                  alt={alt || ''}
+                  draggable={false}
+                  style={{
+                    ...imgStyle,
+                    opacity: imgLoaded ? 1 : 0,
+                    transition: 'opacity 0.2s',
+                  }}
+                  onLoad={() => setImgLoaded(true)}
+                  onError={() => {
+                    setImgError(true);
+                    setImgLoaded(false);
+                  }}
+                />
+              </div>
+
             )}
             {!src && (
               <div
@@ -2385,9 +2470,9 @@ export default function ResizableImageComponent({
                   color: item.danger ? '#ef4444' : '#111',
                 }}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = item.danger
-                    ? '#fef2f2'
-                    : '#f9fafb')
+                (e.currentTarget.style.background = item.danger
+                  ? '#fef2f2'
+                  : '#f9fafb')
                 }
                 onMouseLeave={(e) =>
                   (e.currentTarget.style.background = 'none')
