@@ -1,12 +1,52 @@
 {
-  "name": "my-app",
-  "version": "0.1.0",
-  "private": true,
+  "name": "tiptap-image-resizer",
+  "version": "1.0.0",
+  "description": "A fully-featured resizable image extension for Tiptap editors — resize, crop, rotate, flip, filters, watermark, border, caption and more.",
+  "keywords": [
+    "tiptap",
+    "tiptap-extension",
+    "image",
+    "resizable",
+    "editor",
+    "rich-text",
+    "react",
+    "prosemirror",
+    "image-editor",
+    "crop",
+    "filters"
+  ],
+  "author": "zyronvexley1713",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zyronvexley1713/tiptap-image-resizer.git"
+  },
+  "homepage": "https://zyronvexley1713.github.io/tiptap-image-resizer",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:pkg": "tsup"
+  },
+  "peerDependencies": {
+    "@tiptap/core": ">=2.0.0",
+    "@tiptap/react": ">=2.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   },
   "dependencies": {
     "@silvia-odwyer/photon": "^0.3.3",
@@ -23,8 +63,11 @@
     "postcss": "8.4.30",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-moveable": "^0.56.0",
     "tailwindcss": "3.3.3",
     "typescript": "5.2.2"
-  }
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1"
+  },
+  "private": false
 }
