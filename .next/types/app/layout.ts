@@ -1,4 +1,4 @@
-// File: D:\installed softwares\tiptap-image-resizer\app\layout.tsx
+// File: D:\installed softwares\tiptap-image-resizer-git\tiptap-image-resizer\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
